@@ -1,0 +1,62 @@
+body {
+	background-color: black;
+	font-family: monospace, monospace;
+	color: white;
+}
+
+.cli_input input{
+	border: 0px;
+	background-color: black;
+	color: white;
+	font-family: monospace, monospace;
+	outline: 0px solid transparent;
+	font-size: 17px;
+	max-width: 500px;
+}
+
+.column {
+	float: left;
+	width: 45%;
+	padding: 10px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+[contenteditable]{
+	outline: 0px solid transparent;
+}
+
+#console {
+	margin-left: 100px;
+	padding: 10px;
+	height: 700px;
+	overflow-y: auto;
+	overflow-wrap: break-word;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+#console::-webkit-scrollbar {
+	display: none;
+}
+
+#stats {
+	float: left;
+	width: 15%;
+	padding: 30px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#history p{
+	margin: 10px;
+}
+
+#inventory_box {
+	border: 1px solid white;
+	padding:10px;
+}

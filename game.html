@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hello room</title>
+    <link href="style.css" rel="stylesheet" type="text/css" media="all">
+	<script src="strings.js"></script>
+	<script src="classes.js"></script>
+    <script src="game_script.js"></script>
+    
+  </head>
+  <body onload="bodyOnLoad()">
+  
+  <p>Title</p>
+  
+  <div class="row">
+  
+  <div class="column" id="console">
+  
+	<div id="history">
+	
+		<p>Welcome, please enter a name for the player:</p>
+	
+	</div>
+	
+	<form id="prompt" class="cli_input">
+		
+		<label for="command">>>></label>
+		<input type="text" id="command">
+	
+	</form>
+  
+  </div>
+  
+  <div id="stats">
+  
+	<p id="stats_title"></p>
+	<br>
+	<p>Sanity:</p>
+	<p id="sanity"></p>
+	<br>
+	<div id="inventory_box">
+		<p>Inventory:</p>
+		<ul id="inventory">
+		</ul>
+	</div>
+  
+  </div>
+  
+  </div>
+	
+  </body>
+</html>
