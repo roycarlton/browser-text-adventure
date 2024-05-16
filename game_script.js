@@ -1,7 +1,7 @@
 var consoleHandler;
 var statsHandler;
 var commandSplit;
-var inputDirector = 0;
+inputDirector = 0;
 var player = new Player();
 
 function parseCommand(command){
@@ -10,9 +10,9 @@ function parseCommand(command){
 		case 0:
 			consoleHandler.addToHistory(command, true);
 			consoleHandler.clearSubmitField();
-			player.name = command
+			player.name = command;
 			statsHandler.setTitle(command);
-			var matches = new Matches();
+			var matches = new Matches(0);
 			player.giveItem(matches);
 			player.currentRoom = room0;
 			inputDirector = 1;
@@ -29,20 +29,29 @@ function parseCommand(command){
 					return helpP;
 					break;
 				case "use":
-					if (commandSplit.length != 2){return "'use' should have exactly 1 word after it.";}
+					if (commandSplit.length != 2){return "'use'" + shouldHaveOneWord;}
 					return player.useItem(commandSplit[1]);
 					break;
 				case "look":
 					return player.currentRoom.description;
 					break;
 				case "examine":
-					if (commandSplit.length != 2){return "'examine' should have exactly 1 word after it.";}
+					if (commandSplit.length != 2){return "'examine'" + shouldHaveOneWord;}
 					var objIndex = player.currentRoom.hasObject(commandSplit[1]);
 					if (objIndex > -1) {return player.currentRoom.examine(objIndex);}
 					objIndex = player.hasItem(commandSplit[1]);
 					if (objIndex > -1) {return player.inventory[objIndex].description;}
-					return "'" + commandSplit[1] + "' is not in this area or you inventory."
-					//Add checks for the players' inventory
+					return "'" + commandSplit[1] + "' is not in this area or your inventory."
+					break;
+				case "search":
+					if (commandSplit.length != 2){return "'search'" + shouldHaveOneWord;}
+					var objIndex = player.currentRoom.hasObject(commandSplit[1]);
+					if (objIndex > -1) {return player.currentRoom.search(objIndex, player);}
+					return "'" + commandSplit[1] + "' is not in this area.";
+					break;
+				case "go":
+					if (commandSplit.length != 2){return "'go'" + shouldHaveOneWord;}
+					return player.currentRoom.go(commandSplit[1], player);
 					break;
 			}
 			return "Invalid input";
