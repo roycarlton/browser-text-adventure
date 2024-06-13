@@ -2,6 +2,10 @@ var inputDirector;
 var room0;
 var room1;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 class Item {
 	#id;
 	#name;
@@ -140,8 +144,8 @@ class Room {
 	#interactables;
 	#roomObjects;
 	#dark;
-	
-	constructor(id, description, items, connections, interactables, roomObjects, dark) {
+	#hint;
+	constructor(id, description, items, connections, interactables, roomObjects, dark, hint) {
 		this.#id = id;
 		this.#description = description;
 		this.#items = items;
@@ -149,6 +153,7 @@ class Room {
 		this.#interactables = interactables;
 		this.#roomObjects = roomObjects;
 		this.#dark = dark;
+		this.#hint = hint;
 	}
 	get description() {
 		if (this.#dark) {return "It's too dark to see anything."}
@@ -157,6 +162,7 @@ class Room {
 	get connections() {return this.#connections;}
 	get dark() {return this.#dark;}
 	light() {this.#dark = false;}
+	get hint() {return this.#hint;}
 	hasObject(objectName) {
 		//Returns the index of object in roomObjects array or -1 if not found
 		for (let i=0; i<this.#roomObjects.length; i++) {
@@ -200,8 +206,8 @@ class Room {
 		else {return "You can't go that way.";}
 	}
 }
-room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door, shelves], true);
-room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the north is a large teachers desk and a blackboard with something written on it.<br>To the east, there is a set of windows but they are too dirty to outside.<br> To the west is a door leading to a hallway.<br>To the south is the door to the supply closet.", [], {"south":connector0}, [], [], false);
+room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door, shelves], true, "Try SEARCHing around.");
+room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [], false, "Is there something written on the board?");
 
 var roomList = [room0, room1];
 
@@ -360,6 +366,9 @@ class ConsoleHandler {
 				}
 				this.#submitField.value = out;
 			}
+			else if (event.keyCode == 57) {
+				this.sanitySpin();
+			}
 		});
 	}
 	
@@ -369,6 +378,7 @@ class ConsoleHandler {
 	
 	addToHistory(message, chevs) {
 		var out = "";
+		var leftPadding = "40px";
 		if (chevs) {
 			if (this.#historyPointer >= this.#historyMemory){
 				//Remove oldest commands from begining and add new one
@@ -381,16 +391,67 @@ class ConsoleHandler {
 			}
 			this.#searchPointer = this.#historyPointer;
 			out += ">>> ";
+			leftPadding = "0px";
 		}
 		out += message;
 		var para = document.createElement("p");
 		para.setAttribute("id", this.#historyId.toString());
 		this.#historyDiv.appendChild(para);
 		document.getElementById(this.#historyId.toString()).innerHTML = out;
+		document.getElementById(this.#historyId.toString()).style.paddingLeft = leftPadding;
 		this.#historyId ++;
 	}
 	
 	clearSubmitField() {
 		this.#submitField.value="";
 	}
+	
+	async sanitySpin() {
+		var entriesAffected;
+		if (this.#historyId >= 10) {entriesAffected = 10;}
+		else {entriesAffected = this.#historyId - 1;}
+		var entriesArray = [];
+		var lettersPerEntry;
+		var indiciesArray = [];
+		for (var i=(this.#historyId-1); i>(this.#historyId-(entriesAffected+1)); i--) {
+			var entryText = document.getElementById(i.toString()).innerText;
+			var tempArray = [];
+			var l = entryText.length;
+			if (l >= 20) { lettersPerEntry = Math.floor(l/10);}
+			else {lettersPerEntry = 5;}
+			//Choose some random characters from this entry to spin
+			for (var j=0; j<lettersPerEntry; j++) {
+				var chosenIndex = Math.floor(Math.random() * l);
+				while (tempArray.includes(chosenIndex)){chosenIndex = Math.floor(Math.random() * l);}
+				tempArray.push(chosenIndex);
+			}
+			indiciesArray.push(tempArray);
+			entriesArray.push(entryText);
+		}
+		
+		var sleepTimes = [100, 101, 103, 106, 110, 115, 121, 128, 136, 145, 155, 166, 178, 191, 205, 220, 236, 253, 271, 290, 310, 331, 353, 376, 400, 425, 451, 478, 506];
+		var i = 0;
+		for (var t of sleepTimes) {
+			this.updateSpinners(entriesAffected, entriesArray, indiciesArray);
+			await sleep(t);
+			i++;
+		}
+		
+	}
+	
+	updateSpinners(entriesAffected, entriesArray, indiciesArray) {
+		for (var i=0; i<entriesArray.length; i++) {
+			var stringList = splitStringToList(entriesArray[i]);
+			for (var index of indiciesArray[i]) {
+				stringList[index] = getRandomChar();
+			}
+			entriesArray[i] = stringList.join('');
+		}
+		var j=0;
+		for (var i=(this.#historyId-1); i>(this.#historyId-(entriesAffected+1)); i--) {
+			document.getElementById(i.toString()).innerText = entriesArray[j];
+			j++;
+		}
+	}
+	
 }

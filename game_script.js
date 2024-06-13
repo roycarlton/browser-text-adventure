@@ -53,6 +53,9 @@ function parseCommand(command){
 					if (commandSplit.length != 2){return "'go'" + shouldHaveOneWord;}
 					return player.currentRoom.go(commandSplit[1], player);
 					break;
+				case "hint":
+					return player.currentRoom.hint;
+					break;
 			}
 			return "Invalid input";
 			break;
@@ -83,6 +86,11 @@ function submitForm(event){
 }
 
 function bodyOnLoad(){
+	//console.log("Hello");
+	//sleep(1000).then(() => {console.log("world!");});
+	
+	//console.log(document.getElementById("history").innerText);
+	
 	var promptForm = document.getElementById("prompt");
 	promptForm.addEventListener('submit', submitForm);
 	
