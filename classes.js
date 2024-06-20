@@ -104,9 +104,54 @@ class Shelves extends RoomObject {
 	}
 	examine() {return super.description;}
 }
+class Tables extends RoomObject {
+	constructor(searchItems) {
+		super("tables", searchItems);
+		super.description = "Dusty, worn tables.";
+	}
+	examine() {return super.description;}
+}
+class Chairs extends RoomObject {
+	constructor(searchItems) {
+		super("chairs", searchItems);
+		super.description = "Plastic shool chairs.";
+	}
+	examine() {return super.description;}
+}
+class Windows extends RoomObject {
+	constructor(searchItems) {
+		super("windows", searchItems);
+		super.description = "Some daylight is coming through these windows, but they are too dirty to see anything outside.";
+	}
+	examine() {return super.description;}
+}
+class Desk extends RoomObject {
+	constructor(searchItems) {
+		super("desk", searchItems);
+		super.description = "A large teachers desk, but it's empty.";
+	}
+	examine() {return super.description;}
+}
+class Blackboard extends RoomObject {
+	constructor(searchItems) {
+		super("blackboard", searchItems);
+		super.description = 'This blackboard takes up most of the north wall, the writing on it reads:<br>YOU HAVE BEEN HERE BEFORE, WHAT IS YOUR NAME?';
+	}
+	examine() {return super.description;}
+	interact() {
+		inputDirector = 2;
+		return "The blackboard reads:<br><br>YOU HAVE BEEN HERE BEFORE, WHAT IS YOUR NAME?<br><br>There is a space underneath for you to write something and a piece of chalk resting on the tray at the bottom of the board.<br>What will you write? (type 'back' to exit).";
+	}
+}
 var boxes = new Boxes([]);
-var door = new DoorStandard([]);
+var door1 = new DoorStandard([]);
+var door2 = new DoorStandard([]);
 var shelves = new Shelves([new Key(1)]);
+var tables = new Tables([]);
+var chairs = new Chairs([]);
+var windows = new Windows([]);
+var desk = new Desk([]);
+var blackboard = new Blackboard([]);
 
 class RoomConnector {
 	#id;
@@ -134,6 +179,7 @@ class RoomConnector {
 	get idRequired() {return this.#idRequired;}
 }
 var connector0 = new RoomConnector(0, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {0:1, 1:0}, 1);
+var connector1 = new RoomConnector(1, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {1:2, 2:1}, 2);
 
 
 class Room {
@@ -178,6 +224,10 @@ class Room {
 		if (this.#dark) {return tooDark;}
 		else {return this.#roomObjects[objectIndex].search(player);}
 	}
+	interact(objectIndex) {
+		if (this.#dark) {return tooDark;}
+		else {return this.#roomObjects[objectIndex].interact(player);}
+	}
 	go(direction, player) {
 		//console.log(direction);
 		//console.log(this.#connections.toString())
@@ -206,10 +256,11 @@ class Room {
 		else {return "You can't go that way.";}
 	}
 }
-room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door, shelves], true, "Try SEARCHing around.");
-room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [], false, "Is there something written on the board?");
+room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], true, "Try SEARCHing around.");
+room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [tables, chairs, windows, desk, blackboard], false, "Is there something written on the board? Try interacting with it.");
+room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], false, "Placeholder");
 
-var roomList = [room0, room1];
+var roomList = [room0, room1, room2];
 
 class Player {
 	#name;
@@ -244,7 +295,7 @@ class Player {
 			this.#sanity = newSan;
 		}
 	}
-	decreaseSanity(x) {
+	decreaseSanity(x, consoleHandler, spin) {
 		var newSan = this.#sanity - x;
 		if (newSan <= 0) {
 			this.#sanity = 0;
@@ -252,6 +303,8 @@ class Player {
 		else {
 			this.#sanity = newSan;
 		}
+		consoleHandler.addToHistory("Your sanity has decreased!", false);
+		if (spin) {consoleHandler.sanitySpin();}
 	}
 	get inventory() {
 		return this.#inventory;
@@ -366,9 +419,9 @@ class ConsoleHandler {
 				}
 				this.#submitField.value = out;
 			}
-			else if (event.keyCode == 57) {
+/* 			else if (event.keyCode == 57) {
 				this.sanitySpin();
-			}
+			} */
 		});
 	}
 	
@@ -408,7 +461,7 @@ class ConsoleHandler {
 	
 	async sanitySpin() {
 		var entriesAffected;
-		if (this.#historyId >= 10) {entriesAffected = 10;}
+		if (this.#historyId >= 25) {entriesAffected = 25;}
 		else {entriesAffected = this.#historyId - 1;}
 		var entriesArray = [];
 		var lettersPerEntry;
