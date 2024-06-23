@@ -5,6 +5,9 @@ var commandSplit;
 inputDirector = 0;
 var player = new Player();
 
+//Sounds
+var doorKnockSound = new Audio("sounds/door_knock_boosted.wav");
+
 function parseCommand(command){
 	command = command.trim();
 	consoleHandler.addToHistory(command, true);
@@ -25,6 +28,10 @@ function parseCommand(command){
 			command = command.toLowerCase();
 			commandSplit = command.split(" ");
 			switch(commandSplit[0]) {
+				//Remove sound case
+				case "sound":
+					doorKnockSound.play();
+					break;
 				case "help":
 					return helpP;
 					break;
@@ -57,6 +64,13 @@ function parseCommand(command){
 					if (commandSplit.length != 2){return "'interact'" + shouldHaveOneWord;}
 					var objIndex = player.currentRoom.hasObject(commandSplit[1]);
 					if (objIndex > -1) {return player.currentRoom.interact(objIndex);}
+					return "'" + commandSplit[1] + "' is not in this area.";
+					break;
+				case "take":
+					if (commandSplit.length != 2){return "'take'" + shouldHaveOneWord;}
+					var itemIndex = player.currentRoom.hasItem(commandSplit[1]);
+					if (itemIndex > -1) {return player.currentRoom.take(itemIndex, player);}
+					return "You can't take that.";
 					break;
 				case "hint":
 					return player.currentRoom.hint;
@@ -71,7 +85,13 @@ function parseCommand(command){
 				return "You put down the chalk.";
 			}
 			if (command.trim().toLowerCase() == player.name.toLowerCase()) {
-				return "Correct";
+				blackboard.complete = true;
+				inputDirector = 1;
+				//Add new key to supply closet room, change description and add sound effects
+				room0.addItem(key2);
+				room0.description = "This is the supply closet, it looks the same but there is now a key on the floor.";
+				doorKnockSound.play();
+				return "You write your name on the blackboard and put down the chalk.<br><br>There is a knock coming from the door to the supply closet.";
 			}
 			else {
 				consoleHandler.addToHistory("This doesn't feel right. You erase what you wrote. Try writing again or 'back' to exit.", false);

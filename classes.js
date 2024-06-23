@@ -52,6 +52,7 @@ class Key extends Item {
 		return "You can't use that here.";
 	}
 }
+var key2 = new Key(2);
 //Have room connectors that keys can be used on to unlock
 //or unlock automatically if player uses 'go' with key in their inventory
 
@@ -133,15 +134,21 @@ class Desk extends RoomObject {
 	examine() {return super.description;}
 }
 class Blackboard extends RoomObject {
+	#complete;
 	constructor(searchItems) {
 		super("blackboard", searchItems);
 		super.description = 'This blackboard takes up most of the north wall, the writing on it reads:<br>YOU HAVE BEEN HERE BEFORE, WHAT IS YOUR NAME?';
+		this.#complete = false;
 	}
 	examine() {return super.description;}
 	interact() {
-		inputDirector = 2;
-		return "The blackboard reads:<br><br>YOU HAVE BEEN HERE BEFORE, WHAT IS YOUR NAME?<br><br>There is a space underneath for you to write something and a piece of chalk resting on the tray at the bottom of the board.<br>What will you write? (type 'back' to exit).";
+		if (this.#complete) {return "You have written your name on the blackboard, this feels right.";}
+		else {
+			inputDirector = 2;
+			return "The blackboard reads:<br><br>YOU HAVE BEEN HERE BEFORE, WHAT IS YOUR NAME?<br><br>There is a space underneath for you to write something and a piece of chalk resting on the tray at the bottom of the board.<br>What will you write? (type 'back' to exit).";
+		}
 	}
+	set complete(c) {this.#complete = c;}
 }
 var boxes = new Boxes([]);
 var door1 = new DoorStandard([]);
@@ -189,15 +196,17 @@ class Room {
 	#connections;
 	#interactables;
 	#roomObjects;
+	#roomItems;
 	#dark;
 	#hint;
-	constructor(id, description, items, connections, interactables, roomObjects, dark, hint) {
+	constructor(id, description, items, connections, interactables, roomObjects, roomItems, dark, hint) {
 		this.#id = id;
 		this.#description = description;
 		this.#items = items;
 		this.#connections = connections;
 		this.#interactables = interactables;
 		this.#roomObjects = roomObjects;
+		this.#roomItems = roomItems;
 		this.#dark = dark;
 		this.#hint = hint;
 	}
@@ -205,6 +214,7 @@ class Room {
 		if (this.#dark) {return "It's too dark to see anything."}
 		else {return this.#description;}
 	}
+	set description(s) {this.#description = s;}
 	get connections() {return this.#connections;}
 	get dark() {return this.#dark;}
 	light() {this.#dark = false;}
@@ -216,6 +226,15 @@ class Room {
 		}
 		return -1;
 	}
+	hasItem(itemName) {
+		//Returns the index of item in roomItems array or -1 if not found
+		for (let i=0; i<this.#roomItems.length; i++) {
+			if (this.#roomItems[i].name.toLowerCase() == itemName) {return i;}
+		}
+		return -1;
+	}
+	addObject(roomObj) {this.#roomObjects.push(roomObj);}
+	addItem(itemObj) {this.#roomItems.push(itemObj);}
 	examine(objectIndex) {
 		if (this.#dark) {return tooDark;}
 		else {return this.#roomObjects[objectIndex].examine();}
@@ -226,7 +245,13 @@ class Room {
 	}
 	interact(objectIndex) {
 		if (this.#dark) {return tooDark;}
-		else {return this.#roomObjects[objectIndex].interact(player);}
+		else {return this.#roomObjects[objectIndex].interact();}
+	}
+	take(itemIndex, player) {
+		var itemName = this.#roomItems[itemIndex].name;
+		player.giveItem(this.#roomItems[itemIndex]);
+		this.#roomItems.splice(itemIndex, 1);
+		return "You take the " + itemName + ".";
 	}
 	go(direction, player) {
 		//console.log(direction);
@@ -256,9 +281,9 @@ class Room {
 		else {return "You can't go that way.";}
 	}
 }
-room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], true, "Try SEARCHing around.");
-room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [tables, chairs, windows, desk, blackboard], false, "Is there something written on the board? Try interacting with it.");
-room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], false, "Placeholder");
+room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.");
+room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.");
+room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], [], false, "Placeholder");
 
 var roomList = [room0, room1, room2];
 
