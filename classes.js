@@ -52,7 +52,11 @@ class Key extends Item {
 		return "You can't use that here.";
 	}
 }
+class Note extends Item {
+	constructor(id) {super(id, "Note", 'The note reads: "218 - the good stuff."');}
+}
 var key2 = new Key(2);
+var note = new Note(3);
 //Have room connectors that keys can be used on to unlock
 //or unlock automatically if player uses 'go' with key in their inventory
 
@@ -157,7 +161,7 @@ var shelves = new Shelves([new Key(1)]);
 var tables = new Tables([]);
 var chairs = new Chairs([]);
 var windows = new Windows([]);
-var desk = new Desk([]);
+var desk = new Desk([note]);
 var blackboard = new Blackboard([]);
 
 class RoomConnector {
@@ -292,8 +296,8 @@ class Room {
 	}
 }
 room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.", "Supply Closet", "room0view_dithered.png");
-room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0, "west":connector1}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.", "Classroom");
-room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], [], false, "Placeholder", "Corridor", "room0view_dithered.png");
+room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0, "west":connector1}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.", "Classroom", "room1view_dithered.png");
+room2 = new Room(2, "You are in a school corridor. The wall opposite is lined with lockers, all of which are closed except for one. There is an aroma in the air that you faintly recognise.<br>To the <b>south</b> is a dead end.<br>To the <b>north</b> there is a door with a set of switches next to it.", [], {"east":connector1}, [], [], [], false, "Placeholder", "Corridor", "room0view_dithered.png");
 
 var roomList = [room0, room1, room2];
 
@@ -430,7 +434,7 @@ class StatsHandler {
 			this.#viewField.innerHTML = '<p style="margin-top: 150px; margin-left: 110px;">Too dark.</p>';
 		}
 		else {
-			this.#viewField.innerHTML = '<img src="images/' + room.viewLink + '">';
+			this.#viewField.innerHTML = '<img style="width:300px; height:300px;" src="images/' + room.viewLink + '">';
 		}
 	}
 }
