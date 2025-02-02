@@ -4,6 +4,7 @@ var statsHandler;
 var commandSplit;
 inputDirector = 0;
 var player = new Player();
+var mapLinks = {0:"images/map0.jpg", 1:"images/map1.jpg"};
 
 //Sounds
 var doorKnockSound = new Audio("sounds/door_knock_boosted.wav");
@@ -28,12 +29,12 @@ function parseCommand(command){
 			command = command.toLowerCase();
 			commandSplit = command.split(" ");
 			switch(commandSplit[0]) {
-				//Remove sound case
-				case "sound":
-					doorKnockSound.play();
-					break;
 				case "help":
 					return helpP;
+					break;
+				case "map":
+					var mapProgress = player.mapProgress;
+					
 					break;
 				case "use":
 					if (commandSplit.length != 2){return "'use'" + shouldHaveOneWord;}
@@ -48,6 +49,8 @@ function parseCommand(command){
 					if (objIndex > -1) {return player.currentRoom.examine(objIndex);}
 					objIndex = player.hasItem(commandSplit[1]);
 					if (objIndex > -1) {return player.inventory[objIndex].description;}
+					objIndex = player.currentRoom.hasItem(commandSplit[1]);
+					if (objIndex > -1) {return "You should take it first.";}
 					return "'" + commandSplit[1] + "' is not in this area or your inventory."
 					break;
 				case "search":
@@ -106,6 +109,9 @@ function submitForm(event){
 	//Prevent automatic page refresh on submitting form
 	event.preventDefault();
 	
+	//Update players' map progress
+	if (player.currentRoom.id > player.mapProgress) {player.mapProgress = player.currentRoom.id}
+	
 	//Get field value
 	var command = consoleHandler.readInput();
 	
@@ -118,6 +124,7 @@ function submitForm(event){
 	//Update stats
 	statsHandler.updateSanity(player.sanity);
 	statsHandler.updateInventory(player.inventory);
+	statsHandler.updateView(player.currentRoom);
 	
 	//auto scroll to the bottom of console to keep the command line visible
 	var consoleDiv = document.getElementById("console");
@@ -135,7 +142,7 @@ function bodyOnLoad(){
 	promptForm.addEventListener('submit', submitForm);
 	
 	consoleHandler = new ConsoleHandler("command", "history", 30);
-	statsHandler = new StatsHandler("stats_title", "sanity", "inventory");
+	statsHandler = new StatsHandler("stats_title", "sanity", "inventory", "view_box");
 	
 	//Focus cursor on input field
 	document.getElementById("command").focus();

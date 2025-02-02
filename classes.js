@@ -199,7 +199,9 @@ class Room {
 	#roomItems;
 	#dark;
 	#hint;
-	constructor(id, description, items, connections, interactables, roomObjects, roomItems, dark, hint) {
+	#mapTitle;
+	#viewLink;
+	constructor(id, description, items, connections, interactables, roomObjects, roomItems, dark, hint, mapTitle, viewLink) {
 		this.#id = id;
 		this.#description = description;
 		this.#items = items;
@@ -209,7 +211,14 @@ class Room {
 		this.#roomItems = roomItems;
 		this.#dark = dark;
 		this.#hint = hint;
+		this.#mapTitle = mapTitle;
+		this.#viewLink = viewLink;
 	}
+	get id() {
+		if (this.#dark) {return -1;}
+		else {return this.#id;}
+	}
+	get mapTitle() {return this.#mapTitle;}
 	get description() {
 		if (this.#dark) {return "It's too dark to see anything."}
 		else {return this.#description;}
@@ -219,6 +228,7 @@ class Room {
 	get dark() {return this.#dark;}
 	light() {this.#dark = false;}
 	get hint() {return this.#hint;}
+	get viewLink() {return this.#viewLink;}
 	hasObject(objectName) {
 		//Returns the index of object in roomObjects array or -1 if not found
 		for (let i=0; i<this.#roomObjects.length; i++) {
@@ -281,9 +291,9 @@ class Room {
 		else {return "You can't go that way.";}
 	}
 }
-room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.");
-room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.");
-room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], [], false, "Placeholder");
+room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.", "Supply Closet", "room0view_dithered.png");
+room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0, "west":connector1}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.", "Classroom");
+room2 = new Room(2, "Placeholder", [], {"east":connector1}, [], [], [], false, "Placeholder", "Corridor", "room0view_dithered.png");
 
 var roomList = [room0, room1, room2];
 
@@ -292,12 +302,14 @@ class Player {
 	#sanity;
 	#inventory;
 	#currentRoom;
+	#mapProgress;
 	
 	constructor() {
 		this.#name = "";
 		this.#sanity = 100;
 		this.#inventory = [];
-		this.#currentRoom = null;
+		this.#currentRoom = room0;
+		this.#mapProgress = -1;
 	}
 	
 	get name() {
@@ -311,6 +323,8 @@ class Player {
 	}
 	get currentRoom() {return this.#currentRoom;}
 	set currentRoom(r) {this.#currentRoom = r;}
+	get mapProgress() {return this.#mapProgress;}
+	set mapProgress(mp) {this.#mapProgress = mp;}
 	increaseSanity(x) {
 		var newSan = this.#sanity + x;
 		if (newSan >= 100) {
@@ -386,11 +400,13 @@ class StatsHandler {
 	#titleField;
 	#sanityField;
 	#inventoryField;
+	#viewField;
 	
-	constructor(titleField, sanityField, inventoryField) {
+	constructor(titleField, sanityField, inventoryField, viewField) {
 		this.#titleField = document.getElementById(titleField);
 		this.#sanityField = document.getElementById(sanityField);
 		this.#inventoryField = document.getElementById(inventoryField);
+		this.#viewField = document.getElementById(viewField);
 	}
 	
 	setTitle(title) {
@@ -407,6 +423,15 @@ class StatsHandler {
 			invList += "</li>";
 		}
 		this.#inventoryField.innerHTML = invList;
+	}
+	
+	updateView(room){
+		if (room.dark){
+			this.#viewField.innerHTML = '<p style="margin-top: 150px; margin-left: 110px;">Too dark.</p>';
+		}
+		else {
+			this.#viewField.innerHTML = '<img src="images/' + room.viewLink + '">';
+		}
 	}
 }
 
