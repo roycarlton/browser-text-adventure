@@ -20,7 +20,7 @@ function parseCommand(command){
 			statsHandler.setTitle(command);
 			var matches = new Matches(0);
 			player.giveItem(matches);
-			player.currentRoom = room0;
+			player.currentRoom = room2;
 			inputDirector = 1;
 			return introP;
 			break;
@@ -100,6 +100,29 @@ function parseCommand(command){
 				consoleHandler.addToHistory("This doesn't feel right. You erase what you wrote. Try writing again or 'back' to exit.", false);
 				player.decreaseSanity(10, consoleHandler, true);
 				return "";
+			}
+			break;
+		case 3:
+			if (command == "back") {
+				inputDirector = 1;
+				return "You step back from the switches.";
+			}
+			if (command.length != 8) {return "Invalid input, you must enter a single string of 8 1's or 0's.";}
+			for (var digit of command){
+				if (digit != "1" && digit != "0"){return "Invalid input, you must enter a single string of 8 1's or 0's.";}
+			}
+			if (command == "01101010") {
+				connector2.locked = false;
+				inputDirector = 1;
+				return "The north door swings open.";
+			}
+			else if (command == "11011010") {
+				player.giveItem(pills);
+				return "A hatch below the switches opens, revealing a pill bottle with several pills inside. You take it.";
+			}
+			else {
+				player.decreaseSanity(10, consoleHandler, true);
+				return "A feeling of nausea comes over you. This must be the wrong combination, try a different one.";
 			}
 			break;
 	}

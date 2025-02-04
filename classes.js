@@ -53,10 +53,22 @@ class Key extends Item {
 	}
 }
 class Note extends Item {
-	constructor(id) {super(id, "Note", 'The note reads: "218 - the good stuff."');}
+	constructor(id) {super(id, "Note", 'The note reads:<br><br><b>218 - the good stuff.</b>');}
+}
+class Pills extends Item {
+	constructor(id) {super(id, "Pills", 'A pill bottle with a few pills inside');}
+	use(player){
+		if (player.sanity >= 100) {return "No sense in using these yet.";}
+		else {
+			player.increaseSanity(30);
+			player.removeItem("Pills");
+			return "You tip the contents of the pill bottle into your mouth and swallow.<br><br>Your sanity has increased.";
+		}
+	}
 }
 var key2 = new Key(2);
 var note = new Note(3);
+var pills = new Pills(4);
 //Have room connectors that keys can be used on to unlock
 //or unlock automatically if player uses 'go' with key in their inventory
 
@@ -154,15 +166,36 @@ class Blackboard extends RoomObject {
 	}
 	set complete(c) {this.#complete = c;}
 }
+class Switches extends RoomObject {
+	constructor(searchItems) {
+		super("switches", searchItems);
+		super.description = 'A horizontal row of 8 switches';
+	}
+	examine() {return super.description;}
+	interact() {
+		inputDirector = 3;
+		return "There is a horizontal row of 8 switches. You can set their positions to 'on' or 'off' from left to right by typing 8 numbers below. 1 = on, 0 = off. E.g. '00000000' = all off, and '11111111' = all on. (type 'back' to exit)";
+	}
+}
+class Locker extends RoomObject {
+	constructor(searchItems) {
+		super("locker", searchItems);
+		super.description = "Inside the open locker, a message is written in marker on the back wall. It reads:<br><br><b>Please make it further than I did. Hang on to your memories and we should be able to make it out. 106 - for the door. Good luck.</b>";
+	}
+	examine() {return super.description;}
+}
 var boxes = new Boxes([]);
 var door1 = new DoorStandard([]);
 var door2 = new DoorStandard([]);
+var door3 = new DoorStandard([]);
 var shelves = new Shelves([new Key(1)]);
 var tables = new Tables([]);
 var chairs = new Chairs([]);
 var windows = new Windows([]);
 var desk = new Desk([note]);
 var blackboard = new Blackboard([]);
+var locker = new Locker([]);
+var switches = new Switches([]);
 
 class RoomConnector {
 	#id;
@@ -191,7 +224,7 @@ class RoomConnector {
 }
 var connector0 = new RoomConnector(0, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {0:1, 1:0}, 1);
 var connector1 = new RoomConnector(1, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {1:2, 2:1}, 2);
-
+var connector2 = new RoomConnector(2, true, "You head through the door.", "", "The door is locked.", {2:3, 3:2}, -1);
 
 class Room {
 	#id;
@@ -297,7 +330,8 @@ class Room {
 }
 room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.", "Supply Closet", "room0view_dithered.png");
 room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0, "west":connector1}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.", "Classroom", "room1view_dithered.png");
-room2 = new Room(2, "You are in a school corridor. The wall opposite is lined with lockers, all of which are closed except for one. There is an aroma in the air that you faintly recognise.<br>To the <b>south</b> is a dead end.<br>To the <b>north</b> there is a door with a set of switches next to it.", [], {"east":connector1}, [], [], [], false, "Placeholder", "Corridor", "room0view_dithered.png");
+room2 = new Room(2, "You are in a school corridor. The wall opposite is lined with lockers, all of which are closed except for one. There is an aroma in the air that you faintly recognise.<br>To the <b>south</b> is a dead end.<br>To the <b>north</b> there is a door with a set of switches next to it.", [], {"east":connector1, "north":connector2}, [], [locker, door3, switches], [], false, "Have a look in that locker.", "Corridor", "room0view_dithered.png");
+room3 = new Room(3, "Placeholder.", [], {"south":connector2}, [], [], [], false, "Placeholder.", "Placeholder.", "room0view_dithered.png");
 
 var roomList = [room0, room1, room2];
 
