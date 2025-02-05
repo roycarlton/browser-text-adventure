@@ -180,9 +180,34 @@ class Switches extends RoomObject {
 class Locker extends RoomObject {
 	constructor(searchItems) {
 		super("locker", searchItems);
-		super.description = "Inside the open locker, a message is written in marker on the back wall. It reads:<br><br><b>Please make it further than I did. Hang on to your memories and we should be able to make it out. 106 - for the door. Good luck.</b>";
+		super.description = "Inside the open locker, a message is written in marker on the back wall. It reads:<br><br><b>Hang on to your memories. 106 - for the door. Good luck.</b>";
 	}
 	examine() {return super.description;}
+}
+class Sign extends RoomObject {
+	constructor(searchItems) {
+		super("sign", searchItems);
+		super.description = stockwellSign;
+	}
+	examine() {return super.description;}
+}
+class TrainMap extends RoomObject {
+	constructor(searchItems) {
+		super("map", searchItems);
+		super.description = "This is the map of a train network, but it is badly faded. The title is still visible: 'Tube Map'<br>There is writing in fresh black ink at the bottom of the map. It reads:<br><br><b>One step south on the old Queen's line.</b>";
+	}
+	examine() {return super.description;}
+}
+class Kiosk extends RoomObject {
+	constructor(searchItems) {
+		super("kiosk", searchItems);
+		super.description = 'A machine for dispensing train tickets. The technology looks old; it has a thick glass screen and chunky input buttons. The machine itself is beaten and worn, but still functional.';
+	}
+	examine() {return super.description;}
+	interact() {
+		inputDirector = 4;
+		return "A message on the screen prompts you to enter the name of your desired detination.<br><br>Enter destination: (type 'back' to exit)";
+	}
 }
 var boxes = new Boxes([]);
 var door1 = new DoorStandard([]);
@@ -196,6 +221,9 @@ var desk = new Desk([note]);
 var blackboard = new Blackboard([]);
 var locker = new Locker([]);
 var switches = new Switches([]);
+var sign = new Sign([]);
+var trainMap = new TrainMap([]);
+var kiosk = new Kiosk([]);
 
 class RoomConnector {
 	#id;
@@ -224,7 +252,7 @@ class RoomConnector {
 }
 var connector0 = new RoomConnector(0, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {0:1, 1:0}, 1);
 var connector1 = new RoomConnector(1, true, "You head through the door.", "You unlock the door.", "You do not have the key for this door.", {1:2, 2:1}, 2);
-var connector2 = new RoomConnector(2, true, "You head through the door.", "", "The door is locked.", {2:3, 3:2}, -1);
+var connector2 = new RoomConnector(2, true, "You head through the door.<br>Your environment shifts as the air changes and you are dazed by the bright fluorescent lights of an underground train station platform.<br>The door clicks shut behind you.", "", "The door is locked.", {2:3, 3:2}, -1);
 
 class Room {
 	#id;
@@ -266,6 +294,7 @@ class Room {
 	light() {this.#dark = false;}
 	get hint() {return this.#hint;}
 	get viewLink() {return this.#viewLink;}
+	set viewLink(v) {this.#viewLink = v;}
 	hasObject(objectName) {
 		//Returns the index of object in roomObjects array or -1 if not found
 		for (let i=0; i<this.#roomObjects.length; i++) {
@@ -330,10 +359,10 @@ class Room {
 }
 room0 = new Room(0, "This is a supply closet. There are some shelves against the walls and battered empty boxes by your feet.<br>The only door is to the north.", [], {"north":connector0}, [], [boxes, door1, shelves], [], true, "Try SEARCHing around.", "Supply Closet", "room0view_dithered.png");
 room1 = new Room (1, "You are in what appears to be an abandoned classroom. Tables and chairs are placed untidily across the room and the floors and surfaces are littered with stationary.<br>To the <b>north</b> is a large teachers desk and a blackboard with something written on it.<br>To the <b>east</b>, there is a set of windows but they are too dirty to see outside.<br> To the <b>west</b> is a door leading to a hallway.<br>To the <b>south</b> is the door to the supply closet.", [], {"south":connector0, "west":connector1}, [], [tables, chairs, windows, desk, blackboard, door2], [], false, "Is there something written on the board? Try interacting with it.", "Classroom", "room1view_dithered.png");
-room2 = new Room(2, "You are in a school corridor. The wall opposite is lined with lockers, all of which are closed except for one. There is an aroma in the air that you faintly recognise.<br>To the <b>south</b> is a dead end.<br>To the <b>north</b> there is a door with a set of switches next to it.", [], {"east":connector1, "north":connector2}, [], [locker, door3, switches], [], false, "Have a look in that locker.", "Corridor", "room0view_dithered.png");
-room3 = new Room(3, "Placeholder.", [], {"south":connector2}, [], [], [], false, "Placeholder.", "Placeholder.", "room0view_dithered.png");
+room2 = new Room(2, "You are in a school corridor. The wall opposite is lined with lockers, all of which are closed except for one. There is an aroma in the air that you faintly recognise.<br>To the <b>south</b> is a dead end.<br>To the <b>north</b> there is a door with a set of switches next to it.", [], {"east":connector1, "north":connector2}, [], [locker, door3, switches], [], false, "Have a look in that locker.", "Corridor", "room2view_dithered.png");
+room3 = new Room(3, "You are on the platform of an underground train station. A sign on the other side of the tracks displays the name of the station. Along the platform is a train map and a ticket kiosk. There is a corridor leading west but it is blocked.", [], {"south":connector2}, [], [sign, trainMap, kiosk], [], false, "Interact with the kiosk to decide your destination.", "Platform", "room3view_dithered.png");
 
-var roomList = [room0, room1, room2];
+var roomList = [room0, room1, room2, room3];
 
 class Player {
 	#name;

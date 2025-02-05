@@ -14,8 +14,20 @@ function parseCommand(command){
 	consoleHandler.addToHistory(command, true);
 	consoleHandler.clearSubmitField();
 	switch(inputDirector) {
+		//insanity
+		case -2:
+			inputDirector = -1;
+			return "<b>As the final dregs of sanity slip from your mind, you see your surroundings dissolve into nothingness and hear the faint sound of someone crying out in the distance.<br><br>GAME OVER</b>";
+			break;
+		//Game over
+		case -1:
+			return "";
+			break;
 		//Naming character
 		case 0:
+			for (var c of command) {
+				if (c == " ") {return "Name must not contain spaces.";}
+			}
 			player.name = command;
 			statsHandler.setTitle(command);
 			var matches = new Matches(0);
@@ -32,10 +44,10 @@ function parseCommand(command){
 				case "help":
 					return helpP;
 					break;
-				case "map":
-					var mapProgress = player.mapProgress;
+				//case "map":
+					//var mapProgress = player.mapProgress;
 					
-					break;
+					//break;
 				case "use":
 					if (commandSplit.length != 2){return "'use'" + shouldHaveOneWord;}
 					return player.useItem(commandSplit[1]);
@@ -102,6 +114,7 @@ function parseCommand(command){
 				return "";
 			}
 			break;
+		//Interacting with switches in room 2
 		case 3:
 			if (command == "back") {
 				inputDirector = 1;
@@ -125,6 +138,21 @@ function parseCommand(command){
 				return "A feeling of nausea comes over you. This must be the wrong combination, try a different one.";
 			}
 			break;
+		case 4:
+			if (command.toLowerCase() == "back") {
+				inputDirector = 1;
+				return "You step back from the kiosk.";
+			}
+			else if (command.toLowerCase() == "brixton"){
+				inputDirector = -1;
+				player.currentRoom.viewLink = "room3view_dithered_train.png";
+				return "You enter your destination and the kiosk's screen turns black.<br><br>Moments later, you hear the rumbling of metal wheels as a train emerges from the tunnel and comes to a stop at the platform.<br><br><b>Thankyou for playing! The rest of this game is still under development, please check back soon to continue :)</b>";
+			}
+			else {
+				player.decreaseSanity(10, consoleHandler, true);
+				return "This doesn't feel right.";
+			}
+			break;
 	}
 }
 
@@ -143,6 +171,12 @@ function submitForm(event){
 	
 	//Print response
 	if (response.length > 0) {consoleHandler.addToHistory(response, false);}
+	
+	//If player is in room 3, lock door behind them
+	if (player.currentRoom.id == 3) {connector2.locked = true;}
+	
+	//If sanity drops to zero, end game
+	if (player.sanity <= 0){inputDirector = -2;}
 	
 	//Update stats
 	statsHandler.updateSanity(player.sanity);
